@@ -367,7 +367,12 @@ class WorkQueue(WorkQueueBase):
         else:
             dbs = get_dbs(match['Dbs'])
             if wmspec.getTask(match['TaskName']).parentProcessingFlag():
-                dbsBlockDict = dbs.getFileBlockWithParents(blockName)
+                try:
+                    dbsBlockDict = dbs.getFileBlockWithParents(blockName)
+                except KeyError as ke:
+                    #quick fix to avoid crashing the code.
+                    self.logger.error("Trying to request parents on an orphan file: "+str(ke))
+                    dbsBlockDict = dbs.getFileBlock(blockName)
             else:
                 dbsBlockDict = dbs.getFileBlock(blockName)
 
